@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>석전잔치 QR 인증</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'SUIT';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'SUIT-Heavy';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Heavy.woff2') format('woff2');
+            font-weight: bold;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'barcode';
+            src: url('./barcode.ttf') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+        body {
+            font-family: 'SUIT', sans-serif;
+        }
+        #barcodeArea {
+                font-family: "barcode";
+                font-weight: 400;
+                font-style: normal;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>  
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <div class="flex gap-2 mb-2 justify-between items-center">
+            <h2 class="text-2xl font-bold mb-4 text-center" style="font-family: 'SUIT-Heavy';">2025 석전잔치 출입증</h2>
+            <img src="./council_logo.png" alt="학생회 로고" class="w-10 h-10 ml-auto mb-4">
+        </div>
+        <label class="block mb-2">이름</label>
+        <input id="name" type="text" class="w-full p-2 border rounded mb-4">
+        
+        <label class="block mb-2">전화번호</label>
+        <div class="flex gap-2 mb-2">
+            <span class="w-1/3 p-2 border rounded text-center">010</span>
+            <input id="phone1" type="number" maxlength="4" class="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-1/3 p-2 border rounded text-center" placeholder="1234">
+            <input id="phone2" type="number" maxlength="4" class="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-1/3 p-2 border rounded text-center" placeholder="5678">
+        </div>
+        <p id="phoneError" class="mb-4 text-red-500 text-sm hidden">전화번호 형식이 올바르지 않습니다.</p>
+        
+        <label class="block mb-2">학년</label>
+        <select id="grade" class="w-full p-2 border rounded mb-4">
+            <option value="" disabled selected>학년을 선택하세요</option>
+            <option value="A">중학생 이하</option>
+            <option value="B">고등학교 1학년</option>
+            <option value="C">고등학교 2학년</option>
+            <option value="D">고등학교 3학년</option>
+            <option value="Z">학교 밖 청소년</option>
+        </select>
+        
+        <label class="block mb-2">학교 지역</label>
+        <select id="region" class="w-full p-2 border rounded mb-4">
+            <option value="" disabled selected>학교 지역을 선택하세요</option>
+            <option value="종로중구용산">종로·중구·용산</option>
+            <option value="성북강북">성북·강북</option>
+            <option value="동대문중랑">동대문·중랑</option>
+            <option value="마포은평서대문">마포·은평·서대문</option>
+            <option value="노원도봉">노원·도봉</option>
+            <option value="영등포구로금천">영등포·구로·금천</option>
+            <option value="강남서초">강남·서초</option>
+            <option value="강동송파">강동·송파</option>
+            <option value="강서양천">강서·양천</option>
+            <option value="관악동작">관악·동작</option>
+            <option value="광진성동">광진·성동</option>
+            <option value="기타">기타 (서울 외)</option>
+        </select>
+
+        <label class="flex items-center mb-4">
+            <input id="agree" type="checkbox" class="mr-2">
+            개인정보 처리 방침에 동의합니다.
+            <button id="viewTerms" class="ml-2 text-blue-500 underline text-sm">[약관 보기]</button>
+        </label>
+
+        <div id="termsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+            <div class="bg-white p-4 rounded-lg shadow-lg w-11/12 max-w-md">
+                <h3 class="text-lg font-bold mb-2">중앙고 (학생회) 개인정보 처리방침</h3>
+                <p class="mb-2">중앙고등학교 (학생회)는 다음의 목적을 위하여 개인정보를 처리합니다. 처리하고 있는 개인정보는 다음의 목적 이외의 용도로는 이용되지 않습니다.</p>
+                <p class="mb-2">1. 석전잔치 축제 출입 인원 통제</p>
+                <p class="mb-2">2. 석전잔치 출입 인원 분석</p>
+                <p class="mb-2">중앙고등학교 (학생회)는 다음의 기간 동안 개인정보를 처리·보유합니다.</p>
+                <p class="mb-2">1. 이름 및 전화번호 : 석전잔치 종료 후 2주일까지</p>
+                <p class="mb-2">2. 연령 및 지역 : 차기 석전잔치 준비 기간까지</p>
+                <p class="mb-2">3. 다만, 석전잔치 중 안전사고 발생 등 특별한 사유가 있는 경우, 정보주체로부터 동의를 구한 뒤 보유 및 처리 기간을 연장할 수 있습니다.</p>
+                <p class="mb-2">필수항목 : 성명, 전화번호, 지역, 연령</p>
+                <p class="mb-2">중앙고등학교 (학생회)는 개인정보 보유기간의 경과, 처리목적 달성 등 개인정보가 불필요하게 되었을 때에는 지체없이 해당 개인정보를 파기합니다.</p>
+                <button id="closeModal" class="w-full p-2 bg-blue-500 text-white rounded">닫기</button>
+            </div>
+        </div>
+
+        <script>
+            const viewTermsButton = document.getElementById('viewTerms');
+            const termsModal = document.getElementById('termsModal');
+            const closeModalButton = document.getElementById('closeModal');
+
+            viewTermsButton.addEventListener('click', () => {
+                termsModal.classList.remove('hidden');
+            });
+
+            closeModalButton.addEventListener('click', () => {
+                termsModal.classList.add('hidden');
+            });
+        </script>
+        
+        <button id="submit" class="w-full mb-2 p-2 bg-gray-400 text-white rounded" disabled>완료</button>
+        
+        <div class="flex gap-2 mb-2 justify-center items-center">
+            <div class="text-center m-2" id="qrcode"></div>
+        </div>
+
+    </div>
+    
+    <script>
+        const nameInput = document.getElementById('name');
+        const phone1 = document.getElementById('phone1');
+        const phone2 = document.getElementById('phone2');
+        const phoneError = document.getElementById('phoneError');
+        const gradeSelect = document.getElementById('grade');
+        const regionSelect = document.getElementById('region');
+        const agreeCheckbox = document.getElementById('agree');
+        const submitButton = document.getElementById('submit');
+
+        function validateForm() {
+            const name = nameInput.value.trim();
+            const phonePart1 = phone1.value.trim();
+            const phonePart2 = phone2.value.trim();
+            const phonePattern = /^\d{4}$/;
+            const isPhoneValid = phonePattern.test(phonePart1) && phonePattern.test(phonePart2);
+            
+            phoneError.classList.toggle('hidden', isPhoneValid);
+            
+            const isFormValid = name && isPhoneValid && gradeSelect.value && regionSelect.value && agreeCheckbox.checked;
+            submitButton.disabled = !isFormValid;
+            submitButton.classList.toggle('bg-blue-500', isFormValid);
+            submitButton.classList.toggle('bg-gray-400', !isFormValid);
+        }
+        
+        [nameInput, phone1, phone2, gradeSelect, regionSelect, agreeCheckbox].forEach(input => {
+            input.addEventListener('input', validateForm);
+        });
+
+        function utf8_to_b64( str ) {
+            return window.btoa(unescape(encodeURIComponent( str )));
+        }
+        
+        submitButton.addEventListener('click', (event) => {
+            event.preventDefault(); // 기본 동작 방지
+            if (!submitButton.disabled) {
+                const name = nameInput.value.trim();
+                const phone = `010${phone1.value.trim()}${phone2.value.trim()}`;
+                const grade = gradeSelect.value;
+                const region = regionSelect.value;
+                const barcodeData = `${name}|${phone}|${grade}|${region}`;
+                const barcodeArea = document.getElementById('barcodeArea');
+                
+                const qrcode = new QRCode(document.getElementById('qrcode'), {
+                    text: barcodeData,
+                    width: 128,
+                    height: 128,
+                    colorDark : '#000',
+                    colorLight : '#fff',
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            }
+        });
+
+        // 초기 유효성 검사 호출
+        validateForm();
+    </script>
+</body>
+</html>
